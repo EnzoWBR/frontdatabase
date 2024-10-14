@@ -92,6 +92,11 @@ export default {
     },
     async saveAula() {
       try {
+        if (!this.aula.arquivo) {
+          console.error('Nenhum arquivo foi anexado!'); // Log de erro se não houver arquivo
+          return; // Verifica se há um arquivo anexado
+        }
+
         const formData = new FormData();
         formData.append('titulo', this.aula.titulo);
         formData.append('conteudo', this.aula.conteudo);
@@ -99,18 +104,33 @@ export default {
 
         let response;
         if (this.editando) {
-          response = await axios.put(`http://localhost:3333/aulas/${this.aulas[this.indiceEdicao].id}`, formData);
+          response = await axios.put(
+            `http://localhost:3333/aulas/${this.aulas[this.indiceEdicao].id}`,
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
+          );
           this.editando = false;
         } else {
-          response = await axios.post('http://localhost:3333/aulas', formData);
+          response = await axios.post('http://localhost:3333/aulas', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
         }
-        await this.fetchAulas(); // Atualizar a lista de aulas
+
+        console.log('Resposta do servidor:', response); // Log da resposta do servidor
+
+        await this.fetchAulas(); // Atualiza a lista de aulas
         this.resetForm();
         
         // Mostrar mensagem de sucesso
         alert(response.data.message || 'Aula salva com sucesso!');
       } catch (error) {
-        console.error('Erro ao salvar a aula:', error);
+        console.error('Erro ao salvar a aula:', error.response || error);
         alert('Erro ao salvar a aula. Verifique o console para mais detalhes.');
       }
     },
@@ -133,7 +153,12 @@ export default {
       }
     },
     handleFileUpload(event) {
-      this.aula.arquivo = event.target.files[0];
+      const file = event.target.files[0];
+      if (file) {
+        this.aula.arquivo = file; // Atribui o arquivo selecionado ao estado da aula
+      } else {
+        console.error('Nenhum arquivo selecionado!'); // Log se nenhum arquivo for selecionado
+      }
     },
   },
   async created() {
@@ -143,7 +168,7 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos similares ao código anterior, mas aplicados para aulas */
+/* Estilos semelhantes ao código anterior, mas aplicados para aulas */
 .form {
   display: flex;
   flex-direction: column;

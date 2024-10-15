@@ -4,12 +4,18 @@ import AlunosPage from '../components/AlunosPage.vue';
 import OrganizacaoPage from '../components/OrganizacaoPage.vue';
 import AulasPage from '../components/AulasPage.vue';
 import BemVindoPage from '../components/BemVindoPage.vue'; // Importa a página de boas-vindas
+import LoginPage from '../components/LoginPage.vue'; // Importa a página de login
 
 const routes = [
   {
     path: '/',
+    name: 'login', // Adiciona um nome à rota de login
+    component: LoginPage // Define a página de login como a raiz
+  },
+  {
+    path: '/bem-vindo',
     name: 'bemVindo', // Adiciona um nome à rota de boas-vindas
-    component: BemVindoPage // Define a página de boas-vindas como a raiz
+    component: BemVindoPage // Define a página de boas-vindas
   },
   {
     path: '/escolas',
@@ -33,7 +39,7 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/' // Redireciona para a página de boas-vindas para rotas não encontradas
+    redirect: '/' // Redireciona para a página de login para rotas não encontradas
   }
 ];
 

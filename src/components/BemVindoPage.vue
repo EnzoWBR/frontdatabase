@@ -1,42 +1,58 @@
 <template>
-  <div class="bem-vindo">
-    <h1>BEM VINDO AO GERENCIADOR DE DADOS</h1>
-    <p>Aqui você poderá gerir as informações necessárias para seu sistema operacional.</p>
+  <q-page class="bem-vindo">
+    <q-toolbar class="q-pa-md">
+    
+    </q-toolbar>
 
-    <!-- Cards de Gerenciamento -->
-    <div class="cards-container">
-      <div class="coluna">
-        <!-- Card 1: Gerencie Escolas -->
-        <div class="card" @click="irParaEscolas">
-          <h2>Gerencie Escolas</h2>
-          <p>Administre todas as escolas do sistema.</p>
+    <q-page-container>
+      <q-card class="q-pa-md q-mt-md text-center">
+        <div>
+          <h1>BEM VINDO AO GERENCIADOR DE DADOS</h1>
+          <p>Aqui você poderá gerir as informações necessárias para seu sistema operacional.</p>
         </div>
 
-        <!-- Card 2: Administre Alunos -->
-        <div class="card" @click="irParaAlunos">
-          <h2>Administre Alunos</h2>
-          <p>Gerencie os alunos e suas informações.</p>
-        </div>
-      </div>
+        <!-- Cards de Gerenciamento -->
+        <q-card-section>
+          <div class="cards-container row justify-center q-gutter-md">
+            <!-- Card 1: Gerencie Escolas -->
+            <q-card class="card" clickable @click="irParaEscolas" flat bordered>
+              <q-card-section>
+                <h2>Gerencie Escolas</h2>
+                <p>Administre todas as escolas do sistema.</p>
+              </q-card-section>
+            </q-card>
 
-      <div class="coluna">
-        <!-- Card 3: Organize Aulas -->
-        <div class="card" @click="irParaAulas">
-          <h2>Organize Aulas</h2>
-          <p>Controle as aulas e seus conteúdos.</p>
-        </div>
+            <!-- Card 2: Administre Alunos -->
+            <q-card class="card" clickable @click="irParaAlunos" flat bordered>
+              <q-card-section>
+                <h2>Administre Alunos</h2>
+                <p>Gerencie os alunos e suas informações.</p>
+              </q-card-section>
+            </q-card>
 
-        <!-- Card 4: Gerencie Organizações -->
-        <div class="card" @click="irParaOrganizacao">
-          <h2>Gerencie Organizações</h2>
-          <p>Administre as organizações do sistema.</p>
-        </div>
-      </div>
-    </div>
+            <!-- Card 3: Organize Aulas -->
+            <q-card class="card" clickable @click="irParaAulas" flat bordered>
+              <q-card-section>
+                <h2>Organize Aulas</h2>
+                <p>Controle as aulas e seus conteúdos.</p>
+              </q-card-section>
+            </q-card>
 
-    <!-- Linha azul ao final da página -->
-    <div class="linha-azul"></div>
-  </div>
+            <!-- Card 4: Gerencie Organizações -->
+            <q-card class="card" clickable @click="irParaOrganizacao" flat bordered>
+              <q-card-section>
+                <h2>Gerencie Organizações</h2>
+                <p>Administre as organizações do sistema.</p>
+              </q-card-section>
+            </q-card>
+          </div>
+        </q-card-section>
+
+        <!-- Linha azul ao final da página -->
+        <div class="linha-azul"></div>
+      </q-card>
+    </q-page-container>
+  </q-page>
 </template>
 
 <script>
@@ -79,17 +95,10 @@ export default {
 .cards-container {
   display: flex;
   justify-content: center;
-  gap: 40px; /* Espaço entre as colunas */
+  gap: 40px;
   margin-top: 50px;
 }
 
-.coluna {
-  display: flex;
-  flex-direction: column;
-  gap: 20px; /* Espaço entre os cards na mesma coluna */
-}
-
-/* Estilos para os cards */
 .card {
   padding: 20px;
   background-color: #fff;
@@ -116,7 +125,6 @@ export default {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Linha azul ao final da página */
 .linha-azul {
   width: 100%;
   height: 5px;
@@ -131,6 +139,33 @@ export default {
   }
   to {
     opacity: 1;
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .cards-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .card {
+    width: 80%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .bem-vindo h1 {
+    font-size: 2em;
+  }
+
+  .bem-vindo p {
+    font-size: 1.2em;
+  }
+
+  .card {
+    width: 100%;
   }
 }
 </style>

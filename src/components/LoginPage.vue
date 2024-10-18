@@ -30,6 +30,8 @@
 </template>
 
 <script>
+import { setAuthentication } from '../router'; // Certifique-se de importar a função
+
 export default {
   data() {
     return {
@@ -38,16 +40,37 @@ export default {
     };
   },
   methods: {
-    handleLogin() {
-      // Validação para garantir que o email termina com '.com'
-      if (!this.email.endsWith('.com')) {
-        alert('O email deve terminar com .com');
-        return;
-      }
+    async handleLogin() {
+      try {
+        const response = await fetch('http://localhost:3333/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: this.email,
+            password: this.password,
+          }),
+        });
 
-      // Aqui você pode adicionar a lógica de login, como chamar uma API
-      console.log('Login realizado com:', { email: this.email, password: this.password });
-      // Após a autenticação, redirecionar para a página desejada
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert('Erro ao realizar login: ' + errorData.message);
+          return;
+        }
+
+        const data = await response.json();
+        console.log('Login realizado com sucesso:', data);
+        
+        // Atualize o estado de autenticação
+        setAuthentication(true); // Adicione esta linha para definir a autenticação
+
+        // Redireciona para a página de boas-vindas
+        this.$router.push('/bemvindo');
+      } catch (error) {
+        console.error('Erro na requisição:', error);
+        alert('Erro na requisição. Tente novamente.');
+      }
     },
   },
 };
@@ -108,10 +131,5 @@ input {
 
 .btn-login:hover {
   background-color: #218838;
-}
-
-.register-link {
-  text-align: center;
-  margin-top: 15px;
 }
 </style>

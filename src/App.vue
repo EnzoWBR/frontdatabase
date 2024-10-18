@@ -5,7 +5,6 @@
       <div class="sidebar-header">
         <img src="@/assets/logo2.png" alt="Logo" class="sidebar-logo" @click="navigateTo('bemVindo')" />
         <button class="menu-toggle" @click="toggleMenu">
-          <!-- Condição para alterar a cor do ícone do sanduíche -->
           <span class="menu-icon" :class="{ 'menu-icon-white': menuVisible }">&#9776;</span>
         </button>
       </div>
@@ -21,7 +20,6 @@
     <main class="main-content">
       <header class="header" :class="{ 'centered-header': isCentered }">
         <button class="menu-toggle" @click="toggleMenu">
-          <!-- O ícone de menu fora do sidebar -->
           <span class="menu-icon">&#9776;</span>
         </button>
         <img v-if="!isCentered" src="@/assets/washington.png" alt="Logo" class="logo" />

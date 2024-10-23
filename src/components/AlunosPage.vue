@@ -90,9 +90,8 @@ export default {
   data() {
     return {
       alunos: [],
-      aluno: { nome: '', endereco: '', telefone: '', email: '' },
+      aluno: { id: null, nome: '', endereco: '', telefone: '', email: '' },
       editando: false,
-      indiceEdicao: null
     };
   },
   methods: {
@@ -100,8 +99,10 @@ export default {
       try {
         const response = await axios.get('http://localhost:3333/alunos');
         this.alunos = response.data.alunos || [];
+        this.updateLocalStorage(); // Atualizar o localStorage após buscar os alunos
       } catch (error) {
         console.error('Erro ao buscar alunos:', error);
+        alert('Erro ao buscar alunos. Verifique o console para mais detalhes.');
       }
     },
     async saveAluno() {
@@ -114,9 +115,8 @@ export default {
           response = await axios.post('http://localhost:3333/alunos', this.aluno);
         }
         await this.fetchAlunos(); // Atualizar a lista de alunos
-        this.aluno = { nome: '', endereco: '', telefone: '', email: '' };
-        
-        // Mostrar mensagem de sucesso
+        this.resetForm(); // Resetar o formulário após salvar
+
         alert(response.data.message || 'Aluno(a) salvo com sucesso!');
       } catch (error) {
         console.error('Erro ao salvar o aluno(a):', error);
@@ -126,7 +126,6 @@ export default {
     editarAluno(index) {
       this.aluno = { ...this.alunos[index] };
       this.editando = true;
-      this.indiceEdicao = index;
     },
     async removerAluno(id) {
       try {
@@ -134,11 +133,15 @@ export default {
         await this.fetchAlunos();
       } catch (error) {
         console.error('Erro ao remover o aluno(a):', error);
+        alert('Erro ao remover o aluno(a). Verifique o console para mais detalhes.');
       }
     },
     inativarAluno(index) {
-      // Apenas remover da lista visualmente, mantendo no backend
       this.alunos.splice(index, 1);
+      this.updateLocalStorage(); // Atualizar o localStorage após inativar
+    },
+    updateLocalStorage() {
+      localStorage.setItem('alunos', JSON.stringify(this.alunos));
     },
     formatarNome() {
       this.aluno.nome = this.aluno.nome.replace(/[^a-zA-Z\s]/g, '');
@@ -156,16 +159,25 @@ export default {
         telefone = '(' + telefone.slice(0, 2) + ')' + telefone.slice(2);
       }
       this.aluno.telefone = telefone;
+    },
+    resetForm() {
+      this.aluno = { id: null, nome: '', endereco: '', telefone: '', email: '' };
     }
   },
   async created() {
-    await this.fetchAlunos();
+    // Carregar alunos do localStorage, se existir
+    const alunosStorage = localStorage.getItem('alunos');
+    if (alunosStorage) {
+      this.alunos = JSON.parse(alunosStorage);
+    } else {
+      await this.fetchAlunos(); // Se não houver, buscar do servidor
+    }
   }
 };
 </script>
 
 <style scoped>
-/* Formulário */
+/* Estilos do formulário e tabela conforme o anterior */
 .form {
   display: flex;
   flex-direction: column;
@@ -216,14 +228,15 @@ button.btn-primary {
   margin-top: 10px;
 }
 
-/* Tabela */
+/* Estilos da tabela */
 .table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
 }
 
-.table th, .table td {
+.table th,
+.table td {
   border: 1px solid #ddd;
   padding: 10px;
 }
@@ -236,7 +249,7 @@ button.btn-primary {
   color: black;
 }
 
-/* Botões */
+/* Estilos dos botões */
 button.btn-edit {
   background-color: #007bff;
   color: white;
@@ -264,70 +277,5 @@ button.btn-delete {
   padding: 10px 15px;
   border-radius: 4px;
   cursor: pointer;
-}
-
-/* Ajuste na tabela */
-.table tbody td {
-  text-align: center; /* Centraliza o conteúdo das células */
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-  .form-row {
-    flex-direction: column;
-  }
-
-  .form-group {
-    width: 100%;
-  }
-
-  .table {
-    font-size: 14px;
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .table th, .table td {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 10px 5px;
-  }
-
-  .table thead {
-    display: none;
-  }
-
-  .table tbody tr {
-    display: block;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 10px; /* Adicionar padding aos itens da tabela */
-  }
-
-  .table tbody td {
-    border: none;
-    padding-left: 0; /* Remover padding à esquerda */
-    position: relative;
-    display: flex; /* Usar flex para melhor controle do layout */
-    justify-content: space-between; /* Espaço entre os elementos */
-    align-items: center; /* Alinhar verticalmente */
-  }
-
-  .table tbody td::before {
-    content: attr(data-label);
-    font-weight: bold;
-    text-align: left;
-    flex: 1; /* Permitir que o rótulo ocupe espaço */
-  }
-
-  /* Responsividade dos Botões */
-  button {
-    padding: 8px 5px; /* Ajustar padding dos botões */
-    font-size: 12px; /* Diminuir o tamanho da fonte dos botões */
-    margin: 5px; /* Espaço entre os botões */
-    flex: 1; /* Permitir que os botões ocupem o mesmo espaço */
-  }
 }
 </style>

@@ -52,7 +52,7 @@ export default {
             password: this.password,
           }),
         });
-
+console.log(response)
         if (!response.ok) {
           const errorData = await response.json();
           alert('Erro ao realizar login: ' + errorData.message);

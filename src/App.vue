@@ -14,6 +14,7 @@
         <li :class="{ 'active': isActive('organizacao') }" @click="navigateTo('organizacao')">Organização</li>
         <li :class="{ 'active': isActive('aulas') }" @click="navigateTo('aulas')">Aulas</li>
       </ul>
+      <button class="btn-logout" @click="handleLogout">Sair</button> <!-- Botão de Logout -->
     </aside>
 
     <!-- Conteúdo Principal -->
@@ -37,6 +38,7 @@
 
 <script>
 import { useRouter, useRoute } from 'vue-router';
+import { setAuthentication } from './router/index'; // Ajuste aqui conforme a localização do seu arquivo router
 
 export default {
   data() {
@@ -73,6 +75,11 @@ export default {
       } else {
         this.menuVisible = false;
       }
+    },
+    handleLogout() {
+      setAuthentication(false); // Define a autenticação como falsa
+      localStorage.removeItem('isAuthenticated'); // Remove o estado de autenticação do localStorage
+      this.$router.push('/'); // Redireciona para a página de login
     }
   },
   mounted() {
@@ -178,6 +185,22 @@ export default {
 .sidebar li.active,
 .sidebar li:hover {
   background-color: #007bff;
+}
+
+.btn-logout {
+  margin-top: 20px; /* Adiciona espaço acima do botão de logout */
+  padding: 10px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+}
+
+.btn-logout:hover {
+  background-color: #c82333;
 }
 
 .main-content {
@@ -303,10 +326,9 @@ table tbody tr:hover {
   table td::before {
     content: attr(data-label);
     position: absolute;
-    left: 0;
-    width: 50%;
-    padding-left: 15px;
-    font-weight: bold;
+    left: 10px;
+    width: calc(50% - 20px);
+    white-space: nowrap;
     text-align: left;
   }
 }

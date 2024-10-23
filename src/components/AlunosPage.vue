@@ -92,31 +92,36 @@ export default {
       alunos: [],
       aluno: { id: null, nome: '', endereco: '', telefone: '', email: '' },
       editando: false,
+      token: localStorage.getItem('token'), // Supondo que o token esteja armazenado no localStorage
     };
   },
   methods: {
     async fetchAlunos() {
       try {
-        const response = await axios.get('http://localhost:3333/alunos');
+        const response = await axios.get('http://localhost:3333/alunos', {
+          headers: { Authorization: `Bearer ${this.token}` },
+        });
         this.alunos = response.data.alunos || [];
         this.updateLocalStorage(); // Atualizar o localStorage após buscar os alunos
       } catch (error) {
         console.error('Erro ao buscar alunos:', error);
-        alert('Erro ao buscar alunos. Verifique o console para mais detalhes.');
       }
     },
     async saveAluno() {
       try {
         let response;
         if (this.editando) {
-          response = await axios.put(`http://localhost:3333/alunos/${this.aluno.id}`, this.aluno);
+          response = await axios.put(`http://localhost:3333/alunos/${this.aluno.id}`, this.aluno, {
+            headers: { Authorization: `Bearer ${this.token}` },
+          });
           this.editando = false;
         } else {
-          response = await axios.post('http://localhost:3333/alunos', this.aluno);
+          response = await axios.post('http://localhost:3333/alunos', this.aluno, {
+            headers: { Authorization: `Bearer ${this.token}` },
+          });
         }
-        await this.fetchAlunos(); // Atualizar a lista de alunos
-        this.resetForm(); // Resetar o formulário após salvar
-
+        await this.fetchAlunos();
+        this.resetForm();
         alert(response.data.message || 'Aluno(a) salvo com sucesso!');
       } catch (error) {
         console.error('Erro ao salvar o aluno(a):', error);
@@ -129,7 +134,9 @@ export default {
     },
     async removerAluno(id) {
       try {
-        await axios.delete(`http://localhost:3333/alunos/${id}`);
+        await axios.delete(`http://localhost:3333/alunos/${id}`, {
+          headers: { Authorization: `Bearer ${this.token}` },
+        });
         await this.fetchAlunos();
       } catch (error) {
         console.error('Erro ao remover o aluno(a):', error);
@@ -138,7 +145,7 @@ export default {
     },
     inativarAluno(index) {
       this.alunos.splice(index, 1);
-      this.updateLocalStorage(); // Atualizar o localStorage após inativar
+      this.updateLocalStorage();
     },
     updateLocalStorage() {
       localStorage.setItem('alunos', JSON.stringify(this.alunos));
@@ -165,7 +172,6 @@ export default {
     }
   },
   async created() {
-    // Carregar alunos do localStorage, se existir
     const alunosStorage = localStorage.getItem('alunos');
     if (alunosStorage) {
       this.alunos = JSON.parse(alunosStorage);

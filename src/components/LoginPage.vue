@@ -52,18 +52,23 @@ export default {
             password: this.password,
           }),
         });
-console.log(response)
+
         if (!response.ok) {
-          const errorData = await response.json();
-          alert('Erro ao realizar login: ' + errorData.message);
+          const errorData = await response.json(); // Obter dados de erro
+          alert(`Erro ao realizar login: ${errorData.message || 'Verifique suas credenciais.'}`);
           return;
         }
 
         const data = await response.json();
         console.log('Login realizado com sucesso:', data);
         
-        // Atualize o estado de autenticação
-        setAuthentication(true); // Adicione esta linha para definir a autenticação
+        // Atualize o estado de autenticação e armazene o token se necessário
+        setAuthentication(true); // Define a autenticação como verdadeira
+        localStorage.setItem('token', data.token); // Armazene o token de autenticação
+
+        // Limpa os campos após o login
+        this.email = '';
+        this.password = '';
 
         // Redireciona para a página de boas-vindas
         this.$router.push('/bemvindo');

@@ -8,7 +8,7 @@
       <q-card class="q-pa-md q-mt-md text-center">
         <div>
           <h1>BEM VINDO AO GERENCIADOR DE DADOS</h1>
-          <p>Aqui você poderá gerir as informações necessárias para seu sistema operacional.</p>
+          <p>Seu login foi realizado com sucesso, aqui você poderá gerir as informações necessárias para seu sistema operacional.</p>
         </div>
 
         <!-- Cards de Gerenciamento -->

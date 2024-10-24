@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import axios from 'axios'; // Importa o Axios
 import { setAuthentication } from '../router'; // Certifique-se de importar a função
 
 export default {
@@ -42,24 +43,13 @@ export default {
   methods: {
     async handleLogin() {
       try {
-        const response = await fetch('http://localhost:3333/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: this.email,
-            password: this.password,
-          }),
+        const response = await axios.post('http://localhost:3333/login', {
+          email: this.email,
+          password: this.password,
         });
 
-        if (!response.ok) {
-          const errorData = await response.json(); // Obter dados de erro
-          alert(`Erro ao realizar login: ${errorData.message || 'Verifique suas credenciais.'}`);
-          return;
-        }
-
-        const data = await response.json();
+        // Não é mais necessário verificar o status com response.ok, pois o Axios já lança um erro para status de resposta não 2xx.
+        const data = response.data;
         console.log('Login realizado com sucesso:', data);
         
         // Atualize o estado de autenticação e armazene o token se necessário
@@ -73,8 +63,9 @@ export default {
         // Redireciona para a página de boas-vindas
         this.$router.push('/bemvindo');
       } catch (error) {
-        console.error('Erro na requisição:', error);
-        alert('Erro na requisição. Tente novamente.');
+        // Captura e exibe a mensagem de erro
+        const errorMessage = error.response?.data?.message || 'Verifique suas credenciais.';
+        alert(`Erro ao realizar login: ${errorMessage}`);
       }
     },
   },

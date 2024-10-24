@@ -35,11 +35,13 @@
             accept=".pdf, .mp4, .avi"
             required
           />
+          <p v-if="aula.arquivo">{{ aula.arquivo.name }}</p>
         </div>
       </div>
       <button type="submit" class="btn btn-primary">
         {{ editando ? 'Atualizar' : 'Adicionar' }} Aula
       </button>
+      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     </form>
 
     <!-- Listagem das aulas -->
@@ -79,6 +81,7 @@ export default {
       aula: { titulo: '', conteudo: '', arquivo: null },
       editando: false,
       indiceEdicao: null,
+      errorMessage: '', // Mensagem de erro
     };
   },
   methods: {
@@ -91,9 +94,10 @@ export default {
       }
     },
     async saveAula() {
+      this.errorMessage = ''; // Reseta a mensagem de erro antes de salvar
       try {
         if (!this.aula.arquivo) {
-          console.error('Nenhum arquivo foi anexado!'); // Log de erro se não houver arquivo
+          this.errorMessage = 'Nenhum arquivo foi anexado!';
           return; // Verifica se há um arquivo anexado
         }
 
@@ -123,21 +127,19 @@ export default {
         }
 
         console.log('Resposta do servidor:', response); // Log da resposta do servidor
-
         await this.fetchAulas(); // Atualiza a lista de aulas
         this.resetForm();
-        
-        // Mostrar mensagem de sucesso
         alert(response.data.message || 'Aula salva com sucesso!');
       } catch (error) {
         console.error('Erro ao salvar a aula:', error.response || error);
-        alert('Erro ao salvar a aula. Verifique o console para mais detalhes.');
+        this.errorMessage = 'Erro ao salvar a aula. Verifique o console para mais detalhes.';
       }
     },
     resetForm() {
       this.aula = { titulo: '', conteudo: '', arquivo: null };
       this.editando = false;
       this.indiceEdicao = null;
+      this.errorMessage = ''; // Reseta a mensagem de erro
     },
     editarAula(index) {
       this.aula = { ...this.aulas[index] };
@@ -257,6 +259,12 @@ button.btn-delete {
   padding: 10px 15px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+/* Mensagem de erro */
+.error {
+  color: red;
+  font-weight: bold;
 }
 
 /* Responsividade */

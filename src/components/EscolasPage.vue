@@ -29,6 +29,7 @@
         </div>
       </div>
       <button type="submit" class="btn btn-primary">{{ editando ? 'Atualizar' : 'Adicionar' }} Escola</button>
+      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     </form>
 
     <!-- Listagem das escolas -->
@@ -70,7 +71,7 @@ export default {
       escola: { nome: '', endereco: '', cep: '', telefone: '', email: '' },
       editando: false,
       indiceEdicao: null,
-      pageTitle: 'Gerenciador de Escolas' // Atualizado aqui
+      errorMessage: '', // Mensagem de erro
     };
   },
   methods: {
@@ -80,9 +81,11 @@ export default {
         this.escolas = response.data.escolas || [];
       } catch (error) {
         console.error('Erro ao buscar escolas:', error);
+        this.errorMessage = 'Erro ao buscar escolas. Verifique o console para mais detalhes.';
       }
     },
     async saveEscola() {
+      this.errorMessage = ''; // Limpa a mensagem de erro antes de salvar
       try {
         if (this.editando) {
           await axios.put(`http://localhost:3333/escolas/${this.escola.id}`, this.escola);
@@ -91,9 +94,11 @@ export default {
           await axios.post('http://localhost:3333/escolas', this.escola);
         }
         await this.fetchEscolas();
-        this.escola = { nome: '', endereco: '', cep: '', telefone: '', email: '' };
+        this.resetForm();
+        alert('Escola salva com sucesso!'); // Mensagem de sucesso
       } catch (error) {
         console.error('Erro ao salvar a escola:', error);
+        this.errorMessage = 'Erro ao salvar a escola. Verifique o console para mais detalhes.';
       }
     },
     editarEscola(index) {
@@ -107,6 +112,7 @@ export default {
         await this.fetchEscolas();
       } catch (error) {
         console.error('Erro ao remover a escola:', error);
+        this.errorMessage = 'Erro ao remover a escola. Verifique o console para mais detalhes.';
       }
     },
     formatarNome() {
@@ -131,6 +137,12 @@ export default {
         telefone = '(' + telefone.slice(0, 2) + ') ' + telefone.slice(2);
       }
       this.escola.telefone = telefone;
+    },
+    resetForm() {
+      this.escola = { nome: '', endereco: '', cep: '', telefone: '', email: '' };
+      this.editando = false;
+      this.indiceEdicao = null;
+      this.errorMessage = ''; // Reseta a mensagem de erro
     }
   },
   async created() {
@@ -229,6 +241,12 @@ button.btn-delete {
   padding: 10px 15px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+/* Mensagem de erro */
+.error {
+  color: red;
+  font-weight: bold;
 }
 
 /* Responsividade */

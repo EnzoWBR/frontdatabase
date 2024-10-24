@@ -14,7 +14,7 @@
         <li :class="{ 'active': isActive('organizacao') }" @click="navigateTo('organizacao')">Organização</li>
         <li :class="{ 'active': isActive('aulas') }" @click="navigateTo('aulas')">Aulas</li>
       </ul>
-      <button class="btn-logout" @click="handleLogout">Sair</button> <!-- Botão de Logout -->
+      <button class="btn-logout" @click="confirmLogout">Sair</button> <!-- Botão de Logout -->
     </aside>
 
     <!-- Conteúdo Principal -->
@@ -29,23 +29,30 @@
       <router-view @updateTitle="updateTitle" />
     </main>
 
-    <!-- Tabela Responsiva -->
-    <div class="table-container">
-      <slot></slot>
+    <!-- Diálogo de confirmação de logout -->
+    <div v-if="showLogoutConfirm" class="dialog-overlay">
+      <div class="dialog-box">
+        <p>Tem certeza de que deseja sair?</p>
+        <div class="dialog-actions">
+          <button @click="handleLogout" class="confirm-btn">Sim</button>
+          <button @click="cancelLogout" class="cancel-btn">Não</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { useRouter, useRoute } from 'vue-router';
-import { setAuthentication } from './router/index'; // Ajuste aqui conforme a localização do seu arquivo router
+import { setAuthentication } from './router/index'; // Ajuste conforme a localização do seu arquivo router
 
 export default {
   data() {
     return {
       menuVisible: false,
       pageTitle: 'Gerenciador de Dados', // Valor padrão
-      isCentered: false // Para controlar a centralização do header
+      isCentered: false, // Para controlar a centralização do header
+      showLogoutConfirm: false // Controle de exibição do diálogo de confirmação
     };
   },
   setup() {
@@ -76,10 +83,17 @@ export default {
         this.menuVisible = false;
       }
     },
+    confirmLogout() {
+      this.showLogoutConfirm = true; // Mostra o diálogo de confirmação
+    },
+    cancelLogout() {
+      this.showLogoutConfirm = false; // Fecha o diálogo sem deslogar
+    },
     handleLogout() {
       setAuthentication(false); // Define a autenticação como falsa
       localStorage.removeItem('isAuthenticated'); // Remove o estado de autenticação do localStorage
       this.$router.push('/'); // Redireciona para a página de login
+      this.showLogoutConfirm = false; // Fecha o diálogo
     }
   },
   mounted() {
@@ -188,7 +202,7 @@ export default {
 }
 
 .btn-logout {
-  margin-top: 20px; /* Adiciona espaço acima do botão de logout */
+  margin-top: 20px;
   padding: 10px;
   background-color: #dc3545;
   color: white;
@@ -228,6 +242,7 @@ export default {
 .logo {
   max-width: 150px;
   height: auto;
+  margin-right: 20px;
 }
 
 h1 {
@@ -255,81 +270,67 @@ h1 {
   color: white; /* Cor branca quando o menu está aberto */
 }
 
-/* Estilos da Tabela Responsiva */
-.table-container {
-  overflow-x: auto;
-  margin: 20px 0;
-}
-
-table {
+/* Diálogo de confirmação */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  border-collapse: collapse;
-  font-family: 'Poppins', sans-serif;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
 }
 
-table th,
-table td {
-  padding: 12px 15px;
-  border: 1px solid #ddd;
-  text-align: left;
-  background-color: #ffffff;
+.dialog-box {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 300px;
 }
 
-table th {
-  background-color: #007bff;
+.dialog-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.confirm-btn {
+  background-color: #dc3545;
   color: white;
-}
-
-table tbody tr:hover {
-  background-color: #f1f1f1;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
 }
 
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: block;
-  }
+.confirm-btn:hover {
+  background-color: #c82333;
+}
 
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+@media (max-width: 768px) {
   .main-content {
     margin-left: 0;
   }
 
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .logo {
-    margin-right: 0;
-    margin-bottom: 10px;
-  }
-
-  table thead {
-    display: none;
-  }
-
-  table,
-  table tbody,
-  table tr,
-  table td {
+  .menu-toggle {
     display: block;
-    width: 100%;
-  }
-
-  table td {
-    text-align: right;
-    padding-left: 50%;
-    position: relative;
-  }
-
-  table td::before {
-    content: attr(data-label);
-    position: absolute;
-    left: 10px;
-    width: calc(50% - 20px);
-    white-space: nowrap;
-    text-align: left;
   }
 }
 </style>

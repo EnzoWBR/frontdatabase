@@ -65,7 +65,7 @@ export default {
     };
   },
   methods: {
-    async fetchOrganizacoes() {
+    async axiosOrganizacoes() {
       try {
         const response = await axios.get('http://localhost:3333/organizacao');
         this.organizacoes = response.data.organizacoes || [];
@@ -81,7 +81,7 @@ export default {
         } else {
           await axios.post('http://localhost:3333/organizacao', this.organizacao);
         }
-        await this.fetchOrganizacoes();
+        await this.axiosOrganizacoes();
         this.organizacao = { nome: '', endereco: '', telefone: '', email: '' };
       } catch (error) {
         console.error('Erro ao salvar a organização:', error);
@@ -95,7 +95,7 @@ export default {
     async removerOrganizacao(id) {
       try {
         await axios.delete(`http://localhost:3333/organizacao/${id}`);
-        await this.fetchOrganizacoes();
+        await this.axiosOrganizacoes();
       } catch (error) {
         console.error('Erro ao remover a organização:', error);
       }
@@ -117,7 +117,7 @@ export default {
     }
   },
   async created() {
-    await this.fetchOrganizacoes();
+    await this.axiosOrganizacoes();
   }
 };
 </script>
@@ -234,7 +234,7 @@ button.btn-delete {
     display: block;
     width: 100%;
     text-align: left;
-    padding: 10px 5px;
+    padding: 15px 10px; /* Aumentei o padding para dar mais espaço */
   }
 
   .table thead {
@@ -243,25 +243,32 @@ button.btn-delete {
 
   .table tbody tr {
     display: block;
-    margin-bottom: 10px;
+    margin-bottom: 15px; /* Aumentei o espaço entre as linhas */
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 8px; /* Bordas mais arredondadas para um visual mais agradável */
+    background-color: #f9f9f9; /* Cor de fundo suave para destacar as linhas */
   }
 
   .table tbody td {
     border: none;
-    padding-left: 40%;
+    padding-left: 50%; /* Aumentei o padding para melhor posicionamento */
     position: relative;
   }
 
   .table tbody td::before {
     content: attr(data-label);
     position: absolute;
-    left: 0;
-    width: 50%;
+    left: 10px; /* Ajustei o espaço à esquerda para dar mais visibilidade */
+    width: 45%; /* Ajustei o tamanho do label para evitar sobreposição */
     padding-left: 10px;
     font-weight: bold;
     text-align: left;
+    color: #333; /* Cor mais escura para melhor contraste */
+  }
+
+  /* Adicionando um efeito de sombra sutil às linhas */
+  .table tbody tr:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
 }
 </style>

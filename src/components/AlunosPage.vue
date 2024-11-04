@@ -5,52 +5,31 @@
       <div class="form-row">
         <div class="form-group">
           <label for="nome">Nome</label>
-          <input
-            id="nome"
-            type="text"
-            v-model="aluno.nome"
-            @input="formatarNome"
-            placeholder="Digite o nome"
-            required
-          />
+          <input id="nome" type="text" v-model="aluno.nome" @input="formatarNome" placeholder="Digite o nome" required />
         </div>
         <div class="form-group">
           <label for="endereco">Endereço</label>
-          <input
-            id="endereco"
-            type="text"
-            v-model="aluno.endereco"
-            placeholder="Digite o endereço"
-            required
-          />
+          <input id="endereco" type="text" v-model="aluno.endereco" placeholder="Digite o endereço" required />
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label for="telefone">Telefone</label>
-          <input
-            id="telefone"
-            type="text"
-            v-model="aluno.telefone"
-            @input="formatarTelefone"
-            placeholder="Digite o telefone"
-            required
-          />
+          <input id="telefone" type="text" v-model="aluno.telefone" @input="formatarTelefone" placeholder="Digite o telefone" required />
         </div>
         <div class="form-group">
           <label for="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            v-model="aluno.email"
-            placeholder="Digite o email"
-            required
-          />
+          <input id="email" type="email" v-model="aluno.email" placeholder="Digite o email" required />
         </div>
       </div>
-      <button type="submit" class="btn btn-primary">
-        {{ editando ? 'Atualizar' : 'Adicionar' }} Aluno
-      </button>
+      <div class="form-group">
+        <label for="escola">Escola</label>
+        <select id="escola" v-model="aluno.escolaId" required>
+          <option value="" disabled>Selecione uma escola</option>
+          <option v-for="escola in escolas" :key="escola.id" :value="escola.id">{{ escola.nome }}</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">{{ editando ? 'Atualizar' : 'Adicionar' }} Aluno</button>
     </form>
 
     <!-- Listagem dos alunos -->
@@ -61,6 +40,7 @@
           <th>Endereço</th>
           <th>Telefone</th>
           <th>Email</th>
+          <th>Escola</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -70,6 +50,7 @@
           <td data-label="Endereço">{{ aluno.endereco }}</td>
           <td data-label="Telefone">{{ aluno.telefone }}</td>
           <td data-label="Email">{{ aluno.email }}</td>
+          <td data-label="Escola">{{ aluno.escolaNome }}</td>
           <td data-label="Ações" class="actions">
             <div style="display: flex; justify-content: center;">
               <button class="btn btn-edit" @click="editarAluno(index)">Editar</button>
@@ -90,35 +71,38 @@ export default {
   data() {
     return {
       alunos: [],
-      aluno: { id: null, nome: '', endereco: '', telefone: '', email: '' },
+      escolas: [],
+      aluno: { id: null, nome: '', endereco: '', telefone: '', email: '', escolaId: null },
       editando: false,
-      token: localStorage.getItem('token'), // Supondo que o token esteja armazenado no localStorage
+      token: localStorage.getItem('token'),
     };
   },
   methods: {
     async fetchAlunos() {
       try {
-        const response = await axios.get('http://localhost:3333/alunos', {
-          headers: { Authorization: `Bearer ${this.token}` },
-        });
-        this.alunos = response.data.alunos || [];
-        this.updateLocalStorage(); // Atualizar o localStorage após buscar os alunos
+        const response = await axios.get('http://localhost:3333/alunos', { headers: { Authorization: `Bearer ${this.token}` } });
+        this.alunos = response.data.alunos.map((aluno) => ({ ...aluno, escolaNome: this.escolas.find((escola) => escola.id === aluno.escolaId)?.nome || 'Não informada' }));
+        this.updateLocalStorage();
       } catch (error) {
         console.error('Erro ao buscar alunos:', error);
+      }
+    },
+    async fetchEscolas() {
+      try {
+        const response = await axios.get('http://localhost:3333/escolas', { headers: { Authorization: `Bearer ${this.token}` } });
+        this.escolas = response.data.escolas || [];
+      } catch (error) {
+        console.error('Erro ao buscar escolas:', error);
       }
     },
     async saveAluno() {
       try {
         let response;
         if (this.editando) {
-          response = await axios.put(`http://localhost:3333/alunos/${this.aluno.id}`, this.aluno, {
-            headers: { Authorization: `Bearer ${this.token}` },
-          });
+          response = await axios.put(`http://localhost:3333/alunos/${this.aluno.id}`, this.aluno, { headers: { Authorization: `Bearer ${this.token}` } });
           this.editando = false;
         } else {
-          response = await axios.post('http://localhost:3333/alunos', this.aluno, {
-            headers: { Authorization: `Bearer ${this.token}` },
-          });
+          response = await axios.post('http://localhost:3333/alunos', this.aluno, { headers: { Authorization: `Bearer ${this.token}` } });
         }
         await this.fetchAlunos();
         this.resetForm();
@@ -134,9 +118,7 @@ export default {
     },
     async removerAluno(id) {
       try {
-        await axios.delete(`http://localhost:3333/alunos/${id}`, {
-          headers: { Authorization: `Bearer ${this.token}` },
-        });
+        await axios.delete(`http://localhost:3333/alunos/${id}`, { headers: { Authorization: `Bearer ${this.token}` } });
         await this.fetchAlunos();
       } catch (error) {
         console.error('Erro ao remover o aluno(a):', error);
@@ -168,7 +150,7 @@ export default {
       this.aluno.telefone = telefone;
     },
     resetForm() {
-      this.aluno = { id: null, nome: '', endereco: '', telefone: '', email: '' };
+      this.aluno = { id: null, nome: '', endereco: '', telefone: '', email: '', escolaId: null };
     }
   },
   async created() {
@@ -176,14 +158,14 @@ export default {
     if (alunosStorage) {
       this.alunos = JSON.parse(alunosStorage);
     } else {
-      await this.fetchAlunos(); // Se não houver, buscar do servidor
+      await this.fetchAlunos();
     }
+    await this.fetchEscolas();
   }
 };
 </script>
 
 <style scoped>
-/* Estilos do formulário e tabela conforme o anterior */
 .form {
   display: flex;
   flex-direction: column;
@@ -211,7 +193,7 @@ label {
   font-weight: bold;
 }
 
-input {
+input, select {
   width: 100%;
   padding: 10px;
   border-radius: 4px;
@@ -234,7 +216,6 @@ button.btn-primary {
   margin-top: 10px;
 }
 
-/* Estilos da tabela */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -255,24 +236,11 @@ button.btn-primary {
   color: black;
 }
 
-/* Estilos dos botões */
 button.btn-edit {
   background-color: #007bff;
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 5px;
-}
-
-button.btn-inactivate {
-  background-color: #e0a800; /* Cor amarela mais escura */
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
+  padding: 5px 10px;
   margin-right: 5px;
 }
 
@@ -280,8 +248,13 @@ button.btn-delete {
   background-color: #dc3545;
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
+  padding: 5px 10px;
+}
+
+button.btn-inactivate {
+  background-color: #ffc107;
+  color: white;
+  border: none;
+  padding: 5px 10px;
 }
 </style>

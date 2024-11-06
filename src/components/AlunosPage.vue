@@ -50,7 +50,7 @@
           <td data-label="Endereço">{{ aluno.endereco }}</td>
           <td data-label="Telefone">{{ aluno.telefone }}</td>
           <td data-label="Email">{{ aluno.email }}</td>
-          <td data-label="Escola">{{ aluno.escolaNome }}</td>
+          <td data-label="Escola">{{ aluno.escolaNome }}</td> <!-- Exibe o nome da escola -->
           <td data-label="Ações" class="actions">
             <div style="display: flex; justify-content: center;">
               <button class="btn btn-edit" @click="editarAluno(index)">Editar</button>
@@ -80,8 +80,16 @@ export default {
   methods: {
     async fetchAlunos() {
       try {
-        const response = await axios.get('http://localhost:3333/alunos', { headers: { Authorization: `Bearer ${this.token}` } });
-        this.alunos = response.data.alunos.map((aluno) => ({ ...aluno, escolaNome: this.escolas.find((escola) => escola.id === aluno.escolaId)?.nome || 'Não informada' }));
+        const response = await axios.get('http://localhost:3333/alunos', {
+          headers: { Authorization: `Bearer ${this.token}` },
+        });
+        
+        // Adiciona o nome da escola a cada aluno
+        this.alunos = response.data.alunos.map((aluno) => ({
+          ...aluno,
+          escolaNome: this.escolas.find((escola) => escola.id === aluno.escolaId)?.nome || 'Não informada',
+        }));
+        
         this.updateLocalStorage();
       } catch (error) {
         console.error('Erro ao buscar alunos:', error);
@@ -89,7 +97,9 @@ export default {
     },
     async fetchEscolas() {
       try {
-        const response = await axios.get('http://localhost:3333/escolas', { headers: { Authorization: `Bearer ${this.token}` } });
+        const response = await axios.get('http://localhost:3333/escolas', {
+          headers: { Authorization: `Bearer ${this.token}` },
+        });
         this.escolas = response.data.escolas || [];
       } catch (error) {
         console.error('Erro ao buscar escolas:', error);
@@ -99,10 +109,14 @@ export default {
       try {
         let response;
         if (this.editando) {
-          response = await axios.put(`http://localhost:3333/alunos/${this.aluno.id}`, this.aluno, { headers: { Authorization: `Bearer ${this.token}` } });
+          response = await axios.put(`http://localhost:3333/alunos/${this.aluno.id}`, this.aluno, {
+            headers: { Authorization: `Bearer ${this.token}` },
+          });
           this.editando = false;
         } else {
-          response = await axios.post('http://localhost:3333/alunos', this.aluno, { headers: { Authorization: `Bearer ${this.token}` } });
+          response = await axios.post('http://localhost:3333/alunos', this.aluno, {
+            headers: { Authorization: `Bearer ${this.token}` },
+          });
         }
         await this.fetchAlunos();
         this.resetForm();
@@ -118,7 +132,9 @@ export default {
     },
     async removerAluno(id) {
       try {
-        await axios.delete(`http://localhost:3333/alunos/${id}`, { headers: { Authorization: `Bearer ${this.token}` } });
+        await axios.delete(`http://localhost:3333/alunos/${id}`, {
+          headers: { Authorization: `Bearer ${this.token}` },
+        });
         await this.fetchAlunos();
       } catch (error) {
         console.error('Erro ao remover o aluno(a):', error);
@@ -244,15 +260,16 @@ button.btn-edit {
   margin-right: 5px;
 }
 
-button.btn-delete {
-  background-color: #dc3545;
+button.btn-inactivate {
+  background-color: #ffc107;
   color: white;
   border: none;
   padding: 5px 10px;
+  margin-right: 5px;
 }
 
-button.btn-inactivate {
-  background-color: #ffc107;
+button.btn-delete {
+  background-color: #dc3545;
   color: white;
   border: none;
   padding: 5px 10px;

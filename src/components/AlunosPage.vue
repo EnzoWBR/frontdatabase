@@ -1,71 +1,100 @@
 <template>
-  <div class="content">
+  <q-page padding>
     <!-- Formulário para adicionar ou editar aluno -->
-    <form @submit.prevent="saveAluno" class="form">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="nome">Nome</label>
-          <input id="nome" type="text" v-model="aluno.nome" @input="formatarNome" placeholder="Digite o nome" required />
-        </div>
-        <div class="form-group">
-          <label for="endereco">Endereço</label>
-          <input id="endereco" type="text" v-model="aluno.endereco" placeholder="Digite o endereço" required />
-        </div>
+    <q-form @submit.prevent="saveAluno" class="q-pa-md q-mb-md bg-white rounded-borders shadow-2">
+      <q-bar class="q-mb-md">
+        <q-title>{{ editando ? 'Editar Aluno' : 'Adicionar Aluno' }}</q-title>
+      </q-bar>
+      <div class="q-gutter-md">
+        <q-input
+          filled
+          v-model="aluno.nome"
+          label="Nome"
+          hint="Digite o nome"
+          @input="formatarNome"
+          clearable
+          required
+        />
+        <q-input
+          filled
+          v-model="aluno.endereco"
+          label="Endereço"
+          hint="Digite o endereço"
+          clearable
+          required
+        />
+        <q-input
+          filled
+          v-model="aluno.telefone"
+          label="Telefone"
+          hint="Digite o telefone"
+          mask="(##) #####-####"
+          clearable
+          required
+        />
+        <q-input
+          filled
+          v-model="aluno.email"
+          label="Email"
+          type="email"
+          hint="Digite o email"
+          clearable
+          required
+        />
+        <q-select
+          filled
+          v-model="aluno.escolaId"
+          :options="escolas.map(escola => ({ label: escola.nome, value: escola.id }))"
+          label="Escola"
+          hint="Selecione uma escola"
+          clearable
+          required
+        />
+        <q-btn
+          type="submit"
+          label="{{ editando ? 'Atualizar' : 'Adicionar' }} Aluno"
+          color="positive"
+          unelevated
+          class="full-width"
+        />
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="telefone">Telefone</label>
-          <input id="telefone" type="text" v-model="aluno.telefone" @input="formatarTelefone" placeholder="Digite o telefone" required />
-        </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input id="email" type="email" v-model="aluno.email" placeholder="Digite o email" required />
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="escola">Escola</label>
-        <select id="escola" v-model="aluno.escolaId" required>
-          <option value="" disabled>Selecione uma escola</option>
-          <option v-for="escola in escolas" :key="escola.id" :value="escola.id">{{ escola.nome }}</option>
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary">{{ editando ? 'Atualizar' : 'Adicionar' }} Aluno</button>
-    </form>
+    </q-form>
 
     <!-- Listagem dos alunos -->
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Endereço</th>
-          <th>Telefone</th>
-          <th>Email</th>
-          <th>Escola</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(aluno, index) in alunos" :key="aluno.id">
-          <td class="info" data-label="Nome">{{ aluno.nome }}</td>
-          <td data-label="Endereço">{{ aluno.endereco }}</td>
-          <td data-label="Telefone">{{ aluno.telefone }}</td>
-          <td data-label="Email">{{ aluno.email }}</td>
-          <td data-label="Escola">{{ aluno.escolaNome }}</td> <!-- Exibe o nome da escola -->
-          <td data-label="Ações" class="actions">
-            <div style="display: flex; justify-content: center;">
-              <button class="btn btn-edit" @click="editarAluno(index)">Editar</button>
-              <button class="btn btn-inactivate" @click="inativarAluno(index)">Inativar</button>
-              <button class="btn btn-delete" @click="removerAluno(aluno.id)">Excluir</button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <q-table
+      rows="alunos"
+      :columns="columns"
+      row-key="id"
+      class="shadow-2"
+    >
+      <template v-slot:body-cell-actions="props">
+        <q-btn-group flat>
+          <q-btn
+            icon="edit"
+            label="Editar"
+            color="primary"
+            @click="editarAluno(props.row.id)"
+          />
+          <q-btn
+            icon="close"
+            label="Inativar"
+            color="warning"
+            @click="inativarAluno(props.row.id)"
+          />
+          <q-btn
+            icon="delete"
+            label="Excluir"
+            color="negative"
+            @click="removerAluno(props.row.id)"
+          />
+        </q-btn-group>
+      </template>
+    </q-table>
+  </q-page>
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   data() {
@@ -74,60 +103,74 @@ export default {
       escolas: [],
       aluno: { id: null, nome: '', endereco: '', telefone: '', email: '', escolaId: null },
       editando: false,
-      token: localStorage.getItem('token'),
+      token: localStorage.getItem("token"),
+      columns: [
+        { name: "nome", required: true, label: "Nome", align: "left", field: "nome" },
+        { name: "endereco", label: "Endereço", align: "left", field: "endereco" },
+        { name: "telefone", label: "Telefone", align: "left", field: "telefone" },
+        { name: "email", label: "Email", align: "left", field: "email" },
+        { name: "escolaNome", label: "Escola", align: "left", field: "escolaNome" },
+        { name: "actions", label: "Ações", align: "center" },
+      ],
     };
   },
   methods: {
     async fetchAlunos() {
       try {
-        const response = await axios.get('http://localhost:3333/alunos', {
+        const response = await axios.get("http://localhost:3333/alunos", {
           headers: { Authorization: `Bearer ${this.token}` },
         });
-        
+
         // Adiciona o nome da escola a cada aluno
         this.alunos = response.data.alunos.map((aluno) => ({
           ...aluno,
-          escolaNome: this.escolas.find((escola) => escola.id === aluno.escolaId)?.nome || 'Não informada',
+          escolaNome: this.escolas.find((escola) => escola.id === aluno.escolaId)?.nome || "Não informada",
         }));
-        
-        this.updateLocalStorage();
       } catch (error) {
-        console.error('Erro ao buscar alunos:', error);
+        console.error("Erro ao buscar alunos:", error);
       }
     },
     async fetchEscolas() {
       try {
-        const response = await axios.get('http://localhost:3333/escolas', {
+        const response = await axios.get("http://localhost:3333/escolas", {
           headers: { Authorization: `Bearer ${this.token}` },
         });
         this.escolas = response.data.escolas || [];
       } catch (error) {
-        console.error('Erro ao buscar escolas:', error);
+        console.error("Erro ao buscar escolas:", error);
       }
     },
     async saveAluno() {
       try {
         let response;
         if (this.editando) {
-          response = await axios.put(`http://localhost:3333/alunos/${this.aluno.id}`, this.aluno, {
-            headers: { Authorization: `Bearer ${this.token}` },
-          });
+          response = await axios.put(
+            `http://localhost:3333/alunos/${this.aluno.id}`,
+            this.aluno,
+            { headers: { Authorization: `Bearer ${this.token}` } }
+          );
           this.editando = false;
         } else {
-          response = await axios.post('http://localhost:3333/alunos', this.aluno, {
+          response = await axios.post("http://localhost:3333/alunos", this.aluno, {
             headers: { Authorization: `Bearer ${this.token}` },
           });
         }
-        await this.fetchAlunos();
+        this.fetchAlunos();
         this.resetForm();
-        alert(response.data.message || 'Aluno(a) salvo com sucesso!');
+        this.$q.notify({
+          type: "positive",
+          message: response.data.message || "Aluno(a) salvo com sucesso!",
+        });
       } catch (error) {
-        console.error('Erro ao salvar o aluno(a):', error);
-        alert('Erro ao salvar o aluno(a). Verifique o console para mais detalhes.');
+        console.error("Erro ao salvar o aluno(a):", error);
+        this.$q.notify({
+          type: "negative",
+          message: "Erro ao salvar o aluno(a). Verifique o console para mais detalhes.",
+        });
       }
     },
-    editarAluno(index) {
-      this.aluno = { ...this.alunos[index] };
+    editarAluno(id) {
+      this.aluno = { ...this.alunos.find((aluno) => aluno.id === id) };
       this.editando = true;
     },
     async removerAluno(id) {
@@ -135,143 +178,34 @@ export default {
         await axios.delete(`http://localhost:3333/alunos/${id}`, {
           headers: { Authorization: `Bearer ${this.token}` },
         });
-        await this.fetchAlunos();
+        this.fetchAlunos();
       } catch (error) {
-        console.error('Erro ao remover o aluno(a):', error);
-        alert('Erro ao remover o aluno(a). Verifique o console para mais detalhes.');
+        console.error("Erro ao remover o aluno(a):", error);
+        this.$q.notify({
+          type: "negative",
+          message: "Erro ao remover o aluno(a). Verifique o console para mais detalhes.",
+        });
       }
     },
-    inativarAluno(index) {
-      this.alunos.splice(index, 1);
-      this.updateLocalStorage();
-    },
-    updateLocalStorage() {
-      localStorage.setItem('alunos', JSON.stringify(this.alunos));
-    },
-    formatarNome() {
-      this.aluno.nome = this.aluno.nome.replace(/[^a-zA-Z\s]/g, '');
-    },
-    formatarTelefone() {
-      let telefone = this.aluno.telefone.replace(/\D/g, '');
-      if (telefone.length > 11) {
-        telefone = telefone.slice(0, 11);
+    inativarAluno(id) {
+      const aluno = this.alunos.find((aluno) => aluno.id === id);
+      if (aluno) {
+        aluno.ativo = false;
       }
-      if (telefone.length > 6) {
-        telefone = '(' + telefone.slice(0, 2) + ') ' + telefone.slice(2, 7) + '-' + telefone.slice(7);
-      } else if (telefone.length > 2) {
-        telefone = '(' + telefone.slice(0, 2) + ') ' + telefone.slice(2);
-      } else if (telefone.length > 0) {
-        telefone = '(' + telefone.slice(0, 2) + ')' + telefone.slice(2);
-      }
-      this.aluno.telefone = telefone;
     },
     resetForm() {
       this.aluno = { id: null, nome: '', endereco: '', telefone: '', email: '', escolaId: null };
-    }
+    },
   },
   async created() {
-    const alunosStorage = localStorage.getItem('alunos');
-    if (alunosStorage) {
-      this.alunos = JSON.parse(alunosStorage);
-    } else {
-      await this.fetchAlunos();
-    }
+    await this.fetchAlunos();
     await this.fetchEscolas();
-  }
+  },
 };
 </script>
 
 <style scoped>
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-bottom: 20px;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.form-row {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.form-group {
-  flex: 1;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-input, select {
+.full-width {
   width: 100%;
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  box-sizing: border-box;
-}
-
-button.btn-primary {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  display: block;
-  width: 100%;
-  text-align: center;
-  margin-top: 10px;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-}
-
-.table th,
-.table td {
-  border: 1px solid #ddd;
-  padding: 10px;
-}
-
-.table th {
-  background-color: #f4f4f4;
-}
-
-.info {
-  color: black;
-}
-
-button.btn-edit {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  margin-right: 5px;
-}
-
-button.btn-inactivate {
-  background-color: #ffc107;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  margin-right: 5px;
-}
-
-button.btn-delete {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 5px 10px;
 }
 </style>

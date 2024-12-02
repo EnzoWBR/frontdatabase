@@ -1,32 +1,43 @@
 <template>
-  <div class="login-container">
-    <div class="login-form">
-      <h2>Bem-vindo</h2>
-      <form @submit.prevent="handleLogin">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input
-            id="email"
-            type="email"
+  <q-page class="login-container">
+    <q-card class="login-form">
+      <q-card-section>
+        <h2 class="text-center">Bem-vindo</h2>
+      </q-card-section>
+      <q-card-section>
+        <q-form @submit.prevent="handleLogin" class="q-gutter-md">
+          <!-- Campo de email -->
+          <q-input
+            filled
             v-model="email"
+            label="Email"
+            type="email"
+            :rules="[val => !!val || 'Email é obrigatório']"
             placeholder="Digite seu email"
-            required
+            clearable
           />
-        </div>
-        <div class="form-group">
-          <label for="password">Senha</label>
-          <input
-            id="password"
-            type="password"
+          <!-- Campo de senha -->
+          <q-input
+            filled
             v-model="password"
+            label="Senha"
+            type="password"
+            :rules="[val => !!val || 'Senha é obrigatória']"
             placeholder="Digite sua senha"
-            required
+            clearable
           />
-        </div>
-        <button type="submit" class="btn-login">Entrar</button>
-      </form>
-    </div>
-  </div>
+          <!-- Botão de login -->
+          <q-btn
+            type="submit"
+            label="Entrar"
+            color="primary"
+            class="full-width"
+            :loading="loading"
+          />
+        </q-form>
+      </q-card-section>
+    </q-card>
+  </q-page>
 </template>
 
 <script>
@@ -38,23 +49,24 @@ export default {
     return {
       email: '',
       password: '',
+      loading: false, // Controla o estado de carregamento
     };
   },
   methods: {
     async handleLogin() {
+      this.loading = true; // Ativa o estado de carregamento
       try {
         const response = await axios.post('http://localhost:3333/login', {
           email: this.email,
           password: this.password,
         });
 
-        // Não é mais necessário verificar o status com response.ok, pois o Axios já lança um erro para status de resposta não 2xx.
         const data = response.data;
         console.log('Login realizado com sucesso:', data);
-        
-        // Atualize o estado de autenticação e armazene o token se necessário
-        setAuthentication(true); // Define a autenticação como verdadeira
-        localStorage.setItem('token', data.token); // Armazene o token de autenticação
+
+        // Atualize o estado de autenticação e armazene o token
+        setAuthentication(true);
+        localStorage.setItem('token', data.token);
 
         // Limpa os campos após o login
         this.email = '';
@@ -65,7 +77,9 @@ export default {
       } catch (error) {
         // Captura e exibe a mensagem de erro
         const errorMessage = error.response?.data?.message || 'Verifique suas credenciais.';
-        alert(`Erro ao realizar login: ${errorMessage}`);
+        this.$q.notify({ type: 'negative', message: `Erro ao realizar login: ${errorMessage}` });
+      } finally {
+        this.loading = false; // Desativa o estado de carregamento
       }
     },
   },
@@ -77,55 +91,18 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60vh;
+  height: 100vh;
   background-color: #f0f2f5;
 }
 
 .login-form {
-  background-color: #ffffff;
-  padding: 30px;
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 300px;
-  margin-top: 170px; /* Reduz o espaço acima do formulário */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-
-h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-input {
+.full-width {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.btn-login {
-  width: 100%;
-  padding: 10px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.btn-login:hover {
-  background-color: #218838;
 }
 </style>
